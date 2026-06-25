@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทเรียนออนไลน์ | โรคเอดส์ | นวัตกรรมสุขภาพ ม.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  :root {
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
+    --primary-light: #e0f2fe;
+    --accent: #f0abfc;
+    --accent2: #fbbf24;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --bg: #f0f9ff;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --glass: rgba(255,255,255,0.75);
+    --shadow: 0 8px 32px rgba(14,165,233,0.13);
+    --radius: 18px;
+    --font: 'Sarabun', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated blobs */
+  .blob-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.22;
+    animation: blobMove 12s ease-in-out infinite alternate;
+  }
+  .blob1 { width: 480px; height: 480px; background: #7dd3fc; top: -120px; left: -100px; animation-delay: 0s; }
+  .blob2 { width: 360px; height: 360px; background: #f0abfc; bottom: 0; right: -80px; animation-delay: 3s; }
+  .blob3 { width: 300px; height: 300px; background: #fbbf24; top: 40%; left: 60%; animation-delay: 6s; }
+  @keyframes blobMove {
+    from { transform: translate(0,0) scale(1); }
+    to { transform: translate(30px,40px) scale(1.08); }
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(14,165,233,0.15);
+    box-shadow: 0 2px 16px rgba(14,165,233,0.08);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 64px;
+  }
+  .header-badge {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .header-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display: none; animation: fadeUp 0.4s ease; }
+  .page.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 16px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== LOGIN PAGE ===== */
+  .login-hero {
+    text-align: center;
+    padding: 48px 0 32px;
+  }
+  .login-icon {
+    font-size: 72px;
+    margin-bottom: 16px;
+    display: block;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
+  .login-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1.2;
+  }
+  .login-hero p {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 16px;
+  }
+  .login-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(14,165,233,0.18);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 36px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--primary-dark);
+  }
+  .form-group input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid rgba(14,165,233,0.25);
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 16px;
+    background: rgba(255,255,255,0.8);
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  .form-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-align: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(14,165,233,0.18);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.25); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary-dark);
+    box-shadow: none;
+  }
+  .btn-outline:hover { background: var(--primary-light); }
+  .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+  .btn-full { width: 100%; }
+
+  /* ===== NAV MENU ===== */
+  .menu-hero {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+  .menu-hero h2 { font-size: 26px; font-weight: 800; color: var(--primary-dark); }
+  .menu-hero p { color: var(--muted); font-size: 15px; margin-top: 4px; }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .menu-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(14,165,233,0.15);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(14,165,233,0.06));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .menu-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(14,165,233,0.18); }
+  .menu-card:hover::before { opacity: 1; }
+  .menu-card .icon { font-size: 46px; margin-bottom: 12px; display: block; }
+  .menu-card h3 { font-size: 18px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
+  .menu-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .menu-card .tag {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+
+  /* ===== QUIZ ===== */
+  .quiz-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .quiz-header h2 { font-size: 20px; font-weight: 800; }
+  .timer-box {
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 8px 18px;
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.25);
+    border-radius: 999px;
+    height: 8px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .question-card {
+    background: var(--card);
+    border: 1.5px solid rgba(14,165,233,0.15);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .question-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .choices { display: grid; gap: 12px; }
+  .choice-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid rgba(14,165,233,0.2);
+    border-radius: 14px;
+    background: #f8fbff;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); transform: translateX(4px); }
+  .choice-btn.correct { border-color: #22c55e; background: #f0fdf4; color: #15803d; }
+  .choice-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #dc2626; }
+  .choice-btn:disabled { cursor: default; }
+  .choice-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(14,165,233,0.12);
+    font-weight: 800;
+    font-size: 13px;
+    flex-shrink: 0;
+    color: var(--primary-dark);
+  }
+
+  /* ===== CONTENT ===== */
+  .tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 2px solid rgba(14,165,233,0.2);
+    background: #fff;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+  }
+  .content-panel { display: none; }
+  .content-panel.active { display: block; }
+  .content-card {
+    background: var(--card);
+    border: 1.5px solid rgba(14,165,233,0.13);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .content-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(14,165,233,0.15); }
+  .content-card-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .content-card h3 { font-size: 20px; font-weight: 800; color: var(--primary-dark); margin-bottom: 12px; }
+  .content-card p { line-height: 1.75; color: var(--text); font-size: 15px; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+  .info-chip {
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--primary-dark);
+    font-weight: 500;
+    border: 1.5px solid rgba(14,165,233,0.18);
+    transition: all 0.2s;
+  }
+  .info-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14,165,233,0.15); }
+  .info-chip .chip-icon { font-size: 22px; flex-shrink: 0; }
+  .highlight-box {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #fbbf24;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .highlight-box .hi-icon { font-size: 24px; flex-shrink: 0; }
+  .highlight-box p { font-size: 14px; line-height: 1.65; font-weight: 500; }
+
+  /* ===== GAME ===== */
+  .game-area {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1.5px solid rgba(14,165,233,0.13);
+  }
+  .game-title { font-size: 22px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
+  .game-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+  /* Matching game */
+  .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .match-col h4 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .match-item {
+    padding: 13px 16px;
+    border: 2px solid rgba(14,165,233,0.2);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    background: #f8fbff;
+    color: var(--text);
+    user-select: none;
+  }
+  .match-item:hover { border-color: var(--primary); background: var(--primary-light); }
+  .match-item.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); box-shadow: 0 0 0 3px rgba(14,165,233,0.18); }
+  .match-item.matched { border-color: #22c55e; background: #f0fdf4; color: #15803d; cursor: default; }
+  .match-item.wrong-flash { border-color: #ef4444; background: #fef2f2; animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+  /* ===== RESULTS ===== */
+  .result-card {
+    text-align: center;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 48px 28px;
+    box-shadow: var(--shadow);
+    border: 1.5px solid rgba(14,165,233,0.13);
+  }
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary) calc(var(--pct)*1%), #e2e8f0 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+  .score-inner {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .score-num { font-size: 30px; font-weight: 800; color: var(--primary-dark); }
+  .score-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .grade-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  /* ===== CERTIFICATE ===== */
+  .cert-wrap {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0e6ff 100%);
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .cert-wrap::before {
+    content: '🏆';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.05;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .cert-title { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .cert-name { font-size: 32px; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+  .cert-subject { font-size: 16px; color: var(--text); margin-bottom: 4px; }
+  .cert-score { font-size: 22px; font-weight: 800; color: var(--success); margin: 12px 0; }
+  .cert-by { font-size: 13px; color: var(--muted); margin-top: 20px; border-top: 1px dashed rgba(14,165,233,0.3); padding-top: 16px; }
+
+  /* ===== COMPARISON ===== */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .compare-box {
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .compare-before { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #fbbf24; }
+  .compare-after { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #22c55e; }
+  .compare-box h4 { font-size: 16px; font-weight: 800; margin-bottom: 12px; }
+  .compare-before h4 { color: #92400e; }
+  .compare-after h4 { color: #065f46; }
+  .score-bar-wrap { background: rgba(0,0,0,0.1); border-radius: 999px; height: 10px; margin-top: 12px; overflow: hidden; }
+  .score-bar { height: 100%; border-radius: 999px; transition: width 1s ease; }
+  .score-bar-before { background: #f59e0b; }
+  .score-bar-after { background: #22c55e; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 24px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid rgba(14,165,233,0.12);
+    position: relative;
+    z-index: 1;
+  }
+  footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  /* ===== GAS CODE ===== */
+  .code-block {
+    background: #1e293b;
+    color: #7dd3fc;
+    border-radius: 14px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 16px;
+  }
+
+  /* Loading */
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(240,249,255,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .spinner {
+    width: 56px; height: 56px;
+    border: 5px solid var(--primary-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .match-grid { grid-template-columns: 1fr; }
+    .quiz-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="blob-bg">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div id="loading-overlay" style="display:none;">
+  <div class="spinner"></div>
+  <p style="font-family:var(--font);font-weight:600;color:var(--primary-dark);">กำลังโหลด...</p>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <span style="font-size:28px;">🧬</span>
+    <div style="flex:1;min-width:0;">
+      <div class="header-title">บทเรียนออนไลน์ | โรคเอดส์</div>
+    </div>
+    <div class="header-sub" id="header-info" style="display:none;"></div>
+    <button class="btn btn-outline" id="btn-logout" style="display:none;padding:8px 16px;font-size:13px;" onclick="logout()">
+      <i class="fa fa-sign-out-alt"></i> ออก
+    </button>
+  </div>
+</header>
+
+<!-- ===================== PAGE 1: LOGIN ===================== -->
+<div class="page active" id="page-login">
+  <div class="container">
+    <div class="login-hero">
+      <span class="login-icon">🧬</span>
+      <h1>บทเรียนออนไลน์<br>โรคเอดส์</h1>
+      <p>นวัตกรรมสุขภาพ • ระดับชั้น ม.2</p>
+    </div>
+    <div class="login-card">
+      <div class="form-group">
+        <label><i class="fa fa-user" style="color:var(--primary);margin-right:6px;"></i>ชื่อ–นามสกุล</label>
+        <input type="text" id="input-name" placeholder="กรอกชื่อ-นามสกุลของคุณ" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">
+        <i class="fa fa-arrow-right"></i> เข้าสู่บทเรียน
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 2: MENU ===================== -->
+<div class="page" id="page-menu">
+  <div class="container">
+    <div class="menu-hero">
+      <h2>🧬 โรคเอดส์</h2>
+      <p>นวัตกรรมสุขภาพ ม.2 | เลือกส่วนที่ต้องการเรียนรู้</p>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="gotoPreTest()">
+        <div class="tag">ทำก่อน</div>
+        <span class="icon">📝</span>
+        <h3>แบบทดสอบก่อนเรียน</h3>
+        <p>20 ข้อ แบบตัวเลือกเดียว มีจับเวลาข้อละ 20 วินาที ต้องทำก่อนเข้าเนื้อหา</p>
+      </div>
+      <div class="menu-card" id="card-content" onclick="gotoContent()" style="pointer-events:none;opacity:0.5;">
+        <div class="tag">เนื้อหา</div>
+        <span class="icon">📚</span>
+        <h3>เนื้อหาความรู้</h3>
+        <p>อธิบายเรื่องสาเหตุ อาการ และการป้องกันรักษาโรคเอดส์ พร้อมภาพไอคอน</p>
+      </div>
+      <div class="menu-card" id="card-post" onclick="gotoPostTest()" style="pointer-events:none;opacity:0.5;">
+        <div class="tag">ทำหลัง</div>
+        <span class="icon">✅</span>
+        <h3>แบบทดสอบหลังเรียน</h3>
+        <p>20 ข้อ ชุดเดิมสลับลำดับ เปรียบเทียบคะแนนกับก่อนเรียน</p>
+      </div>
+      <div class="menu-card" id="card-game" onclick="gotoGame()" style="pointer-events:none;opacity:0.5;">
+        <div class="tag">เกม</div>
+        <span class="icon">🎮</span>
+        <h3>เกมไต่อบ</h3>
+        <p>จับคู่ข้อความ ทดสอบความเข้าใจเรื่องโรคเอดส์อย่างสนุกสนาน</p>
+      </div>
+      <div class="menu-card" id="card-score" onclick="gotoScore()" style="pointer-events:none;opacity:0.5;">
+        <div class="tag">ผลคะแนน</div>
+        <span class="icon">📊</span>
+        <h3>ตรวจสอบคะแนน</h3>
+        <p>เปรียบเทียบคะแนนก่อน–หลังเรียน พร้อมบอกระดับคุณภาพ</p>
+      </div>
+      <div class="menu-card" id="card-cert" onclick="gotoCert()" style="pointer-events:none;opacity:0.5;">
+        <div class="tag">รางวัล</div>
+        <span class="icon">🏆</span>
+        <h3>เกียรติบัตร</h3>
+        <p>ดาวน์โหลดเกียรติบัตรเมื่อทำแบบทดสอบหลังเรียนได้มากกว่า 80%</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 3: PRE-TEST ===================== -->
+<div class="page" id="page-pretest">
+  <div class="container">
+    <div class="quiz-header">
+      <div>
+        <div style="font-size:12px;opacity:0.8;margin-bottom:4px;">แบบทดสอบก่อนเรียน • โรคเอดส์</div>
+        <h2>ข้อ <span id="pre-qnum">1</span> จาก 20</h2>
+        <div class="progress-bar-wrap" style="width:220px;">
+          <div class="progress-bar-fill" id="pre-progress" style="width:5%;"></div>
+        </div>
+      </div>
+      <div class="timer-box">⏱ <span id="pre-timer">20</span>s</div>
+    </div>
+    <div class="question-card">
+      <div class="question-num">คำถามที่ <span id="pre-qnum2">1</span></div>
+      <div class="question-text" id="pre-question">กำลังโหลด...</div>
+      <div class="choices" id="pre-choices"></div>
+    </div>
+    <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+  </div>
+</div>
+
+<!-- ===================== PAGE 4: CONTENT ===================== -->
+<div class="page" id="page-content">
+  <div class="container">
+    <div class="menu-hero">
+      <h2>📚 เนื้อหาความรู้</h2>
+      <p>โรคเอดส์ | นวัตกรรมสุขภาพ ม.2</p>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('tab1',this)">🦠 สาเหตุ & อาการ</button>
+      <button class="tab-btn" onclick="switchTab('tab2',this)">🛡️ การป้องกัน & รักษา</button>
+    </div>
+
+    <!-- TAB 1 -->
+    <div class="content-panel active" id="tab1">
+      <div class="content-card">
+        <span class="content-card-icon">🦠</span>
+        <h3>โรคเอดส์คืออะไร?</h3>
+        <p>โรคเอดส์ (AIDS – Acquired Immune Deficiency Syndrome) เป็นโรคที่เกิดจากเชื้อไวรัส HIV (Human Immunodeficiency Virus) ซึ่งทำลายระบบภูมิคุ้มกันของร่างกาย ทำให้ร่างกายอ่อนแอและติดเชื้อโรคอื่นได้ง่าย</p>
+      </div>
+      <div class="content-card">
+        <span class="content-card-icon">⚠️</span>
+        <h3>สาเหตุการติดเชื้อ HIV</h3>
+        <p>เชื้อ HIV ติดต่อผ่านทางของเหลวในร่างกาย ได้แก่:</p>
+        <div class="info-grid" style="margin-top:14px;">
+          <div class="info-chip"><span class="chip-icon">💉</span><div>การสัมผัสเลือดของผู้ติดเชื้อ เช่น ใช้เข็มฉีดยาร่วมกัน</div></div>
+          <div class="info-chip"><span class="chip-icon">❤️</span><div>การมีเพศสัมพันธ์โดยไม่ป้องกัน</div></div>
+          <div class="info-chip"><span class="chip-icon">🤱</span><div>จากแม่สู่ลูก ระหว่างตั้งครรภ์ คลอด หรือให้นมบุตร</div></div>
+          <div class="info-chip"><span class="chip-icon">🩸</span><div>การรับเลือดหรืออวัยวะที่มีเชื้อ HIV</div></div>
+        </div>
+        <div class="highlight-box">
+          <span class="hi-icon">💡</span>
+          <p><strong>ข้อเท็จจริง:</strong> เชื้อ HIV ไม่ติดต่อทางการจับมือ กอด จาม ไอ หรือการใช้ชีวิตร่วมกันตามปกติ</p>
+        </div>
+      </div>
+      <div class="content-card">
+        <span class="content-card-icon">🩺</span>
+        <h3>อาการของโรคเอดส์</h3>
+        <div class="info-grid">
+          <div class="info-chip"><span class="chip-icon">🌡️</span><div><strong>ระยะแรก (2-4 สัปดาห์)</strong><br>มีไข้ ปวดหัว เจ็บคอ ต่อมน้ำเหลืองโต คล้ายไข้หวัด</div></div>
+          <div class="info-chip"><span class="chip-icon">😶</span><div><strong>ระยะแฝง (นาน 10 ปี)</strong><br>ไม่มีอาการ แต่เชื้อยังทำลายภูมิคุ้มกันอยู่เงียบๆ</div></div>
+          <div class="info-chip"><span class="chip-icon">😷</span><div><strong>ระยะ AIDS เต็มขั้น</strong><br>น้ำหนักลด ท้องเสียเรื้อรัง ติดเชื้อฉวยโอกาส เช่น วัณโรค</div></div>
+          <div class="info-chip"><span class="chip-icon">🧠</span><div><strong>อาการทางระบบประสาท</strong><br>สมองอักเสบ สับสน หลงลืม</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2 -->
+    <div class="content-panel" id="tab2">
+      <div class="content-card">
+        <span class="content-card-icon">🛡️</span>
+        <h3>การป้องกันโรคเอดส์</h3>
+        <div class="info-grid">
+          <div class="info-chip"><span class="chip-icon">🩹</span><div>ใช้ถุงยางอนามัยทุกครั้งที่มีเพศสัมพันธ์</div></div>
+          <div class="info-chip"><span class="chip-icon">💉</span><div>ไม่ใช้เข็มฉีดยาร่วมกับผู้อื่น</div></div>
+          <div class="info-chip"><span class="chip-icon">🩸</span><div>ตรวจสอบความปลอดภัยของเลือดก่อนรับการถ่ายเลือด</div></div>
+          <div class="info-chip"><span class="chip-icon">🤱</span><div>หญิงตั้งครรภ์ที่ติดเชื้อควรรับยาต้านไวรัสเพื่อลดการถ่ายทอดสู่ลูก</div></div>
+          <div class="info-chip"><span class="chip-icon">💊</span><div>ยา PrEP สำหรับผู้ที่มีความเสี่ยงสูง ช่วยป้องกันการติดเชื้อ</div></div>
+          <div class="info-chip"><span class="chip-icon">🧪</span><div>ตรวจหาเชื้อ HIV เป็นประจำเพื่อรู้สถานะตัวเอง</div></div>
+        </div>
+      </div>
+      <div class="content-card">
+        <span class="content-card-icon">💊</span>
+        <h3>การรักษาโรคเอดส์</h3>
+        <p>ปัจจุบันยังไม่มีวัคซีนหรือยาที่รักษา HIV ให้หายขาดได้ แต่สามารถควบคุมเชื้อได้ด้วย:</p>
+        <div class="info-grid" style="margin-top:14px;">
+          <div class="info-chip"><span class="chip-icon">💊</span><div><strong>ยาต้านไวรัส (ARV)</strong><br>กดปริมาณไวรัสในเลือดให้ต่ำมาก ทำให้ร่างกายแข็งแรง</div></div>
+          <div class="info-chip"><span class="chip-icon">📅</span><div><strong>รับยาอย่างต่อเนื่อง</strong><br>ต้องรับยาทุกวันตรงเวลาไม่ขาด เพื่อป้องกันเชื้อดื้อยา</div></div>
+          <div class="info-chip"><span class="chip-icon">🏥</span><div><strong>ติดตามอาการ</strong><br>พบแพทย์เป็นประจำ ตรวจนับ CD4 และ Viral Load</div></div>
+          <div class="info-chip"><span class="chip-icon">🥗</span><div><strong>ดูแลสุขภาพ</strong><br>กินอาหารครบ5หมู่ ออกกำลังกาย พักผ่อนเพียงพอ</div></div>
+        </div>
+        <div class="highlight-box">
+          <span class="hi-icon">✅</span>
+          <p><strong>ข่าวดี:</strong> ผู้ติดเชื้อ HIV ที่รับยาต้านไวรัสอย่างต่อเนื่องสามารถมีคุณภาพชีวิตที่ดี มีอายุยืนยาว และมีปริมาณเชื้อต่ำจนไม่สามารถถ่ายทอดเชื้อได้ (U=U)</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+      <button class="btn btn-primary" onclick="unlockAndGo('card-post','page-posttest','gotoPostTest')">
+        ทำแบบทดสอบหลังเรียน <i class="fa fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 5: POST-TEST ===================== -->
+<div class="page" id="page-posttest">
+  <div class="container">
+    <div class="quiz-header" style="background:linear-gradient(135deg,#22c55e,#16a34a);">
+      <div>
+        <div style="font-size:12px;opacity:0.8;margin-bottom:4px;">แบบทดสอบหลังเรียน • โรคเอดส์</div>
+        <h2>ข้อ <span id="post-qnum">1</span> จาก 20</h2>
+        <div class="progress-bar-wrap" style="width:220px;">
+          <div class="progress-bar-fill" id="post-progress" style="width:5%;"></div>
+        </div>
+      </div>
+      <div class="timer-box">⏱ <span id="post-timer">20</span>s</div>
+    </div>
+    <div class="question-card">
+      <div class="question-num">คำถามที่ <span id="post-qnum2">1</span></div>
+      <div class="question-text" id="post-question">กำลังโหลด...</div>
+      <div class="choices" id="post-choices"></div>
+    </div>
+    <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+  </div>
+</div>
+
+<!-- ===================== PAGE 6: GAME ===================== -->
+<div class="page" id="page-game">
+  <div class="container">
+    <div class="menu-hero">
+      <h2>🎮 เกมจับคู่</h2>
+      <p>จับคู่คำศัพท์กับความหมายให้ถูกต้อง</p>
+    </div>
+    <div class="game-area">
+      <div class="game-title">🔗 จับคู่ให้ตรงกัน</div>
+      <div class="game-desc">คลิกคำทางซ้าย แล้วคลิกคำทางขวา เพื่อจับคู่</div>
+      <div id="game-score-bar" style="margin-bottom:16px;font-weight:700;color:var(--primary-dark);">คะแนน: <span id="game-score">0</span>/8</div>
+      <div class="match-grid">
+        <div>
+          <h4>คำศัพท์ / แนวคิด</h4>
+          <div id="match-left"></div>
+        </div>
+        <div>
+          <h4>ความหมาย / คำตอบ</h4>
+          <div id="match-right"></div>
+        </div>
+      </div>
+      <div id="game-result" style="display:none;text-align:center;margin-top:24px;">
+        <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:22px;font-weight:800;color:var(--primary-dark);margin-bottom:16px;">เก่งมาก! จับคู่ครบแล้ว!</div>
+        <button class="btn btn-primary" onclick="restartGame()">เล่นอีกครั้ง</button>
+      </div>
+    </div>
+    <div style="margin-top:24px;">
+      <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 7: SCORE ===================== -->
+<div class="page" id="page-score">
+  <div class="container">
+    <div class="menu-hero">
+      <h2>📊 ผลคะแนน</h2>
+      <p>เปรียบเทียบคะแนนก่อน–หลังเรียน</p>
+    </div>
+    <div id="score-content"></div>
+    <div style="margin-top:24px;">
+      <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 8: CERT ===================== -->
+<div class="page" id="page-cert">
+  <div class="container">
+    <div class="menu-hero">
+      <h2>🏆 เกียรติบัตร</h2>
+      <p>แสดงผลสำเร็จการเรียนรู้</p>
+    </div>
+    <div id="cert-content"></div>
+    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="goPage('page-menu')"><i class="fa fa-arrow-left"></i> กลับเมนู</button>
+      <a id="cert-download-btn" href="#" target="_blank" style="display:none;" class="btn btn-success">
+        <i class="fa fa-download"></i> ดาวน์โหลดเกียรติบัตร
+      </a>
+    </div>
+
+    <!-- GAS Code section -->
+    <div class="content-card" style="margin-top:32px;">
+      <h3 style="font-size:17px;margin-bottom:8px;">🔧 Google Apps Script Code</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">สำหรับบันทึกข้อมูลและสร้างเกียรติบัตรอัตโนมัติ</p>
+      <div class="code-block" id="gas-code"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 Copyright | พัฒนาโดย <a href="#">อาจารย์ณัฏฐภาส พรมมา</a>
+</footer>
+
+<script>
+// =================== DATA ===================
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHPgSktqg1Dat3B2mP96Oe8Xx3XBzczFPZ7y38sOfmnGFSf1_a_cxwXBM3lzAJ7t1g/exec";
+const SHEET_ID = "1EYDC6zkR3xW1gRksFKpf628qTbhgEeIYNrqNXD5d3Xk";
+const TEMPLATE_SLIDE_ID = "12X6GKM79_Kj23Oe9KUvHworQF3kdjOSEFPqlbOORQnc";
+const FOLDER_ID = "1DzUhhAK9dfWg7_DdoGOyStZdr8xHRXQc";
+
+const QUESTIONS_ORIG = [
+  { q: "ไวรัสที่ทำให้เกิดโรคเอดส์มีชื่อว่าอะไร?", choices: ["HBV","HIV","HPV","HSV"], ans: 1 },
+  { q: "AIDS ย่อมาจากอะไร?", choices: ["Acquired Immune Deficiency Syndrome","Acute Infectious Disease Syndrome","Autoimmune Disorder Syndrome","Advanced Infection Disease System"], ans: 0 },
+  { q: "เชื้อ HIV ทำลายเซลล์ใดของร่างกายเป็นหลัก?", choices: ["เม็ดเลือดแดง","เม็ดเลือดขาว CD4","เกล็ดเลือด","เซลล์ตับ"], ans: 1 },
+  { q: "ข้อใดไม่ใช่ทางแพร่กระจายของเชื้อ HIV?", choices: ["การมีเพศสัมพันธ์ไม่ป้องกัน","การจับมือ","การใช้เข็มฉีดยาร่วมกัน","จากแม่สู่ลูก"], ans: 1 },
+  { q: "ยาที่ใช้รักษา HIV เรียกว่าอะไร?", choices: ["ยาปฏิชีวนะ","ยาต้านไวรัส (ARV)","ยาลดไข้","ยาสเตียรอยด์"], ans: 1 },
+  { q: "ระยะแฝงของ HIV อาจยาวนานถึงกี่ปี?", choices: ["1 ปี","5 ปี","10 ปี","20 ปี"], ans: 2 },
+  { q: "ยา PrEP ใช้สำหรับอะไร?", choices: ["รักษา AIDS","ป้องกันการติดเชื้อ HIV","เพิ่มภูมิคุ้มกัน","ลดไข้"], ans: 1 },
+  { q: "U=U หมายความว่าอะไร?", choices: ["ไม่มีวัคซีน=ไม่มีทางรักษา","ตรวจไม่พบ=ถ่ายทอดไม่ได้","เชื้อไม่ดื้อยา","รักษาได้ภายใน 1 ปี"], ans: 1 },
+  { q: "อาการใดเกิดในระยะเริ่มติดเชื้อ HIV?", choices: ["เป็นมะเร็ง","ปวดหัว มีไข้ เจ็บคอ คล้ายไข้หวัด","ตาบอด","หูหนวก"], ans: 1 },
+  { q: "การตรวจนับ CD4 บอกอะไร?", choices: ["ปริมาณเชื้อในเลือด","ระดับภูมิคุ้มกัน","ระดับน้ำตาล","การทำงานของตับ"], ans: 1 },
+  { q: "โรคใดเป็น 'โรคติดเชื้อฉวยโอกาส' ที่พบบ่อยในผู้ป่วยเอดส์?", choices: ["ไข้หวัดใหญ่","วัณโรค","โรคหัด","โรคคางทูม"], ans: 1 },
+  { q: "ข้อใดถูกต้องเกี่ยวกับการป้องกัน HIV?", choices: ["ใช้ถุงยางอนามัยทุกครั้ง","ดื่มน้ำมาก ๆ","กินวิตามิน C","ออกกำลังกาย"], ans: 0 },
+  { q: "ผู้ติดเชื้อ HIV ควรพบแพทย์เพื่อตรวจอะไรเป็นประจำ?", choices: ["X-ray ทรวงอก","Viral Load และ CD4","เอ็กซ์เรย์กระดูก","ตรวจสายตา"], ans: 1 },
+  { q: "ถ้าหญิงตั้งครรภ์ติดเชื้อ HIV ควรทำอย่างไร?", choices: ["ไม่ต้องทำอะไร","รับยาต้านไวรัสเพื่อป้องกันการถ่ายทอดสู่ลูก","หยุดให้นมบุตรเท่านั้น","ผ่าตัดตลอดชีวิต"], ans: 1 },
+  { q: "เชื้อ HIV สามารถอยู่ในของเหลวชนิดใด?", choices: ["น้ำลายปริมาณมาก","เลือด น้ำอสุจิ น้ำนม","เหงื่อ","น้ำตา"], ans: 1 },
+  { q: "ข้อใดไม่ถูกต้องเกี่ยวกับ HIV?", choices: ["ยังไม่มีวัคซีนป้องกัน","ยา ARV ทำให้เชื้อหายได้","ยา ARV ช่วยควบคุมเชื้อได้","ผู้ติดเชื้อมีชีวิตยืนยาวได้"], ans: 1 },
+  { q: "Viral Load คืออะไร?", choices: ["น้ำหนักผู้ป่วย","ปริมาณเชื้อ HIV ในเลือด","จำนวนเม็ดยาที่กิน","ความดันโลหิต"], ans: 1 },
+  { q: "ข้อใดควรทำเพื่อรู้สถานะการติดเชื้อ HIV ของตัวเอง?", choices: ["ดูสีผิว","ตรวจเลือดหาเชื้อ HIV","วัดอุณหภูมิ","ชั่งน้ำหนัก"], ans: 1 },
+  { q: "โรคเอดส์ถูกค้นพบครั้งแรกในช่วงปีใด?", choices: ["ทศวรรษ 1960","ทศวรรษ 1980","ทศวรรษ 2000","ทศวรรษ 1950"], ans: 1 },
+  { q: "หน่วยงานหลักด้านสาธารณสุขที่รณรงค์ต่อต้าน HIV ทั่วโลกคือ?", choices: ["UNICEF","WHO (องค์การอนามัยโลก)","UNESCO","IMF"], ans: 1 },
+];
+
+// =================== STATE ===================
+let userName = "";
+let preAnswers = [];
+let postAnswers = [];
+let preScore = -1;
+let postScore = -1;
+let preQuestions = [];
+let postQuestions = [];
+let currentQ = 0;
+let timerInterval = null;
+let timeLeft = 20;
+let isPost = false;
+let certId = "";
+let matchLeft = null;
+let matchRight = null;
+let matchScore = 0;
+const MATCH_PAIRS = [
+  {left:"HIV",right:"ไวรัสที่ทำให้เกิดเอดส์"},
+  {left:"AIDS",right:"กลุ่มอาการภูมิคุ้มกันบกพร่อง"},
+  {left:"CD4",right:"เซลล์ภูมิคุ้มกันหลัก"},
+  {left:"ARV",right:"ยาต้านไวรัส"},
+  {left:"PrEP",right:"ยาป้องกันก่อนสัมผัสเชื้อ"},
+  {left:"Viral Load",right:"ปริมาณเชื้อในเลือด"},
+  {left:"U=U",right:"ตรวจไม่พบ=ถ่ายทอดไม่ได้"},
+  {left:"วัณโรค",right:"โรคติดเชื้อฉวยโอกาสที่พบบ่อย"},
+];
+
+// =================== UTILS ===================
+function shuffle(arr) {
+  let a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    let j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function showLoading(v) {
+  document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none';
+}
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// =================== LOGIN ===================
+function doLogin() {
+  const name = document.getElementById('input-name').value.trim();
+  if (!name) {
+    Swal.fire({ icon:'warning', title:'กรุณากรอกชื่อ', text:'กรุณากรอกชื่อ-นามสกุลของคุณ', confirmButtonColor:'#0ea5e9', fontFamily:'Sarabun' });
+    return;
+  }
+  userName = name;
+  document.getElementById('header-info').textContent = name + ' | ม.2 | นวัตกรรมสุขภาพ';
+  document.getElementById('header-info').style.display = '';
+  document.getElementById('btn-logout').style.display = '';
+  goPage('page-menu');
+}
+function logout() {
+  Swal.fire({
+    title: 'ออกจากระบบ?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'ออก',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#ef4444',
+  }).then(r => {
+    if (r.isConfirmed) {
+      userName = ""; preAnswers = []; postAnswers = []; preScore = -1; postScore = -1;
+      document.getElementById('header-info').style.display = 'none';
+      document.getElementById('btn-logout').style.display = 'none';
+      document.getElementById('input-name').value = '';
+      // lock cards
+      ['card-content','card-post','card-game','card-score','card-cert'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.pointerEvents = 'none'; el.style.opacity = '0.5';
+      });
+      goPage('page-login');
+    }
+  });
+}
+
+// =================== MENU NAV ===================
+function gotoPreTest() {
+  if (preScore >= 0) {
+    Swal.fire({ icon:'info', title:'ทำแล้ว', text:'คุณทำแบบทดสอบก่อนเรียนไปแล้ว', confirmButtonColor:'#0ea5e9' });
+    return;
+  }
+  preQuestions = shuffle(QUESTIONS_ORIG);
+  currentQ = 0; preAnswers = []; isPost = false;
+  goPage('page-pretest');
+  loadQuestion();
+}
+function gotoContent() { goPage('page-content'); }
+function gotoPostTest() {
+  if (preScore < 0) {
+    Swal.fire({ icon:'warning', title:'ยังไม่ได้ทำ', text:'กรุณาทำแบบทดสอบก่อนเรียนและเรียนเนื้อหาก่อน', confirmButtonColor:'#0ea5e9' }); return;
+  }
+  if (postScore >= 0) {
+    Swal.fire({ icon:'info', title:'ทำแล้ว', text:'คุณทำแบบทดสอบหลังเรียนไปแล้ว', confirmButtonColor:'#0ea5e9' }); return;
+  }
+  postQuestions = shuffle(QUESTIONS_ORIG);
+  currentQ = 0; postAnswers = []; isPost = true;
+  goPage('page-posttest');
+  loadQuestion();
+}
+function gotoGame() { setupGame(); goPage('page-game'); }
+function gotoScore() { renderScore(); goPage('page-score'); }
+function gotoCert() { renderCert(); goPage('page-cert'); }
+function unlockAndGo(cardId, pageId, fnName) {
+  const el = document.getElementById(cardId);
+  el.style.pointerEvents = ''; el.style.opacity = '';
+  goPage(pageId);
+  if (fnName === 'gotoPostTest') { gotoPostTest(); }
+}
+
+// =================== QUIZ ===================
+function loadQuestion() {
+  clearInterval(timerInterval);
+  timeLeft = 20;
+  const qs = isPost ? postQuestions : preQuestions;
+  const q = qs[currentQ];
+  const prefix = isPost ? 'post' : 'pre';
+  document.getElementById(prefix+'-qnum').textContent = currentQ+1;
+  document.getElementById(prefix+'-qnum2').textContent = currentQ+1;
+  document.getElementById(prefix+'-question').textContent = q.q;
+  document.getElementById(prefix+'-timer').textContent = timeLeft;
+  document.getElementById(prefix+'-progress').style.width = ((currentQ/20)*100)+'%';
+
+  const choicesEl = document.getElementById(prefix+'-choices');
+  choicesEl.innerHTML = '';
+  const letters = ['ก','ข','ค','ง'];
+  q.choices.forEach((c,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span>${c}`;
+    btn.onclick = () => selectAnswer(i, q.ans, btn, choicesEl);
+    choicesEl.appendChild(btn);
+  });
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById(prefix+'-timer').textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      recordAnswer(-1, q.ans, choicesEl);
+    }
+  }, 1000);
+}
+function selectAnswer(chosen, correct, btn, choicesEl) {
+  clearInterval(timerInterval);
+  recordAnswer(chosen, correct, choicesEl);
+}
+function recordAnswer(chosen, correct, choicesEl) {
+  const btns = choicesEl.querySelectorAll('.choice-btn');
+  btns.forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    else if (i === chosen && chosen !== correct) b.classList.add('wrong');
+  });
+  if (isPost) postAnswers.push(chosen === correct ? 1 : 0);
+  else preAnswers.push(chosen === correct ? 1 : 0);
+  setTimeout(() => nextQuestion(), 900);
+}
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= 20) {
+    finishQuiz();
+  } else {
+    loadQuestion();
+  }
+}
+function finishQuiz() {
+  clearInterval(timerInterval);
+  const score = (isPost ? postAnswers : preAnswers).reduce((a,b)=>a+b,0);
+  if (isPost) {
+    postScore = score;
+    // unlock
+    ['card-game','card-score','card-cert'].forEach(id => {
+      const el = document.getElementById(id);
+      el.style.pointerEvents = ''; el.style.opacity = '';
+    });
+    // Save to sheet via GAS
+    saveToSheet();
+    showResult(score, true);
+  } else {
+    preScore = score;
+    // unlock content
+    document.getElementById('card-content').style.pointerEvents = '';
+    document.getElementById('card-content').style.opacity = '';
+    document.getElementById('card-post').style.pointerEvents = '';
+    document.getElementById('card-post').style.opacity = '';
+    document.getElementById('card-game').style.pointerEvents = '';
+    document.getElementById('card-game').style.opacity = '';
+    showResult(score, false);
+  }
+}
+function showResult(score, isPostTest) {
+  const pct = Math.round(score/20*100);
+  let grade = '', color = '', emoji = '';
+  if (pct >= 80) { grade='ดีเยี่ยม'; color='#22c55e'; emoji='🌟'; }
+  else if (pct >= 60) { grade='ผ่านเกณฑ์'; color='#0ea5e9'; emoji='👍'; }
+  else { grade='ต้องพัฒนา'; color='#f59e0b'; emoji='📚'; }
+
+  Swal.fire({
+    title: `${emoji} ผลคะแนน`,
+    html: `<div style="font-family:Sarabun,sans-serif;font-size:18px;">
+      ${isPostTest ? 'หลังเรียน' : 'ก่อนเรียน'}<br>
+      <span style="font-size:48px;font-weight:800;color:${color};">${score}<small style="font-size:20px;">/20</small></span><br>
+      <span style="font-size:20px;color:${color};font-weight:700;">${pct}% • ${grade}</span>
+    </div>`,
+    confirmButtonText: isPostTest ? 'ดูผลเปรียบเทียบ' : 'เรียนเนื้อหา',
+    confirmButtonColor: '#0ea5e9',
+    allowOutsideClick: false,
+  }).then(() => {
+    if (isPostTest) { renderScore(); goPage('page-score'); }
+    else { goPage('page-content'); }
+  });
+}
+
+// =================== CONTENT TABS ===================
+function switchTab(id, btn) {
+  document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// =================== GAME ===================
+function setupGame() {
+  matchLeft = null; matchRight = null; matchScore = 0;
+  document.getElementById('game-score').textContent = '0';
+  document.getElementById('game-result').style.display = 'none';
+  const pairs = shuffle(MATCH_PAIRS);
+  const lefts = pairs.map(p=>p.left);
+  const rights = shuffle(pairs.map(p=>p.right));
+  const lEl = document.getElementById('match-left');
+  const rEl = document.getElementById('match-right');
+  lEl.innerHTML = ''; rEl.innerHTML = '';
+  lefts.forEach((l,i) => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.textContent = l;
+    d.dataset.val = l;
+    d.dataset.side = 'left';
+    d.onclick = () => selectMatch(d, 'left');
+    lEl.appendChild(d);
+  });
+  rights.forEach((r,i) => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.textContent = r;
+    d.dataset.val = r;
+    d.dataset.side = 'right';
+    d.onclick = () => selectMatch(d, 'right');
+    rEl.appendChild(d);
+  });
+}
+function selectMatch(el, side) {
+  if (el.classList.contains('matched')) return;
+  if (side === 'left') {
+    document.querySelectorAll('#match-left .match-item').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    matchLeft = el;
+  } else {
+    document.querySelectorAll('#match-right .match-item').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    matchRight = el;
+  }
+  if (matchLeft && matchRight) checkMatch();
+}
+function checkMatch() {
+  const lv = matchLeft.dataset.val;
+  const rv = matchRight.dataset.val;
+  const correct = MATCH_PAIRS.find(p => p.left===lv && p.right===rv);
+  if (correct) {
+    matchLeft.classList.remove('selected'); matchLeft.classList.add('matched');
+    matchRight.classList.remove('selected'); matchRight.classList.add('matched');
+    matchScore++;
+    document.getElementById('game-score').textContent = matchScore;
+    if (matchScore === MATCH_PAIRS.length) {
+      setTimeout(() => { document.getElementById('game-result').style.display = 'block'; }, 400);
+    }
+  } else {
+    matchLeft.classList.add('wrong-flash'); matchRight.classList.add('wrong-flash');
+    setTimeout(() => {
+      matchLeft.classList.remove('selected','wrong-flash');
+      matchRight.classList.remove('selected','wrong-flash');
+    }, 600);
+  }
+  matchLeft = null; matchRight = null;
+}
+function restartGame() { setupGame(); }
+
+// =================== SCORE ===================
+function renderScore() {
+  const el = document.getElementById('score-content');
+  if (preScore < 0) {
+    el.innerHTML = '<div class="content-card"><p>ยังไม่ได้ทำแบบทดสอบ</p></div>'; return;
+  }
+  const prePct = Math.round(preScore/20*100);
+  const postPct = postScore >= 0 ? Math.round(postScore/20*100) : null;
+  let grade = (s) => s >= 80 ? '🌟 ดีเยี่ยม' : s >= 60 ? '👍 ผ่านเกณฑ์' : '📚 ต้องพัฒนา';
+
+  el.innerHTML = `
+    <div class="compare-grid">
+      <div class="compare-box compare-before">
+        <h4>📝 ก่อนเรียน</h4>
+        <div style="font-size:36px;font-weight:800;color:#92400e;">${preScore}<small style="font-size:16px;">/20</small></div>
+        <div style="font-size:18px;font-weight:700;color:#92400e;">${prePct}%</div>
+        <div style="font-size:13px;margin-top:4px;">${grade(prePct)}</div>
+        <div class="score-bar-wrap"><div class="score-bar score-bar-before" style="width:${prePct}%"></div></div>
+      </div>
+      ${postScore >= 0 ? `
+      <div class="compare-box compare-after">
+        <h4>✅ หลังเรียน</h4>
+        <div style="font-size:36px;font-weight:800;color:#065f46;">${postScore}<small style="font-size:16px;">/20</small></div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">${postPct}%</div>
+        <div style="font-size:13px;margin-top:4px;">${grade(postPct)}</div>
+        <div class="score-bar-wrap"><div class="score-bar score-bar-after" style="width:${postPct}%"></div></div>
+      </div>` : `<div class="compare-box" style="background:#f1f5f9;border:2px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;"><p style="color:var(--muted);text-align:center;">ยังไม่ได้ทำ<br>แบบทดสอบหลังเรียน</p></div>`}
+    </div>
+    ${postScore >= 0 ? `<div class="content-card" style="margin-top:20px;text-align:center;">
+      <div style="font-size:14px;color:var(--muted);">พัฒนาได้</div>
+      <div style="font-size:36px;font-weight:800;color:${postPct-prePct>=0?'#22c55e':'#ef4444'};">${postPct-prePct >= 0?'+':''}${postPct-prePct}%</div>
+      <div style="font-size:14px;color:var(--muted);">คะแนนหลังเรียนเทียบกับก่อนเรียน</div>
+    </div>` : ''}
+  `;
+}
+
+// =================== CERT ===================
+function renderCert() {
+  const el = document.getElementById('cert-content');
+  const btn = document.getElementById('cert-download-btn');
+
+  if (postScore < 0) {
+    el.innerHTML = '<div class="content-card"><p>กรุณาทำแบบทดสอบหลังเรียนก่อน</p></div>';
+    btn.style.display = 'none'; return;
+  }
+  const pct = Math.round(postScore/20*100);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH', {year:'numeric',month:'long',day:'numeric'});
+
+  if (pct >= 80) {
+    certId = String(Math.floor(Math.random()*900)+100).padStart(3,'0');
+    el.innerHTML = `
+      <div class="cert-wrap">
+        <div class="cert-title">เกียรติบัตรแสดงความสำเร็จ</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">ID เกียรติบัตร: ${certId}</div>
+        <div class="cert-name">${userName}</div>
+        <div class="cert-subject">ผ่านบทเรียนออนไลน์ วิชานวัตกรรมสุขภาพ<br>เรื่อง <strong>โรคเอดส์</strong> ระดับชั้น ม.2</div>
+        <div class="cert-score">คะแนน ${postScore}/20 (${pct}%)</div>
+        <div class="cert-by">
+          ออกให้ ณ วันที่ ${dateStr}<br>
+          ตำแหน่ง: ครูผู้สอน<br>
+          ประทับเวลา: ${now.toLocaleTimeString('th-TH')}
+        </div>
+      </div>
+    `;
+    // Open in Google Drive template
+    const driveUrl = `https://drive.google.com/file/d/${TEMPLATE_SLIDE_ID}/view`;
+    btn.href = driveUrl;
+    btn.style.display = '';
+  } else {
+    el.innerHTML = `<div class="result-card">
+      <div style="font-size:64px;margin-bottom:16px;">😔</div>
+      <h3 style="font-size:22px;font-weight:800;color:var(--primary-dark);margin-bottom:8px;">คะแนนไม่ถึง 80%</h3>
+      <p style="color:var(--muted);">คุณได้ ${pct}% กรุณาทบทวนเนื้อหาและลองอีกครั้ง</p>
+    </div>`;
+    btn.style.display = 'none';
+  }
+
+  // GAS Code
+  document.getElementById('gas-code').textContent = `
+// Google Apps Script สำหรับบันทึกข้อมูลเกียรติบัตร
+function doPost(e) {
+  const params = new URLSearchParams(e.postData.contents);
+  const ss = SpreadsheetApp.openById("${SHEET_ID}");
+  const sheet = ss.getActiveSheet();
+
+  // ตรวจสอบ ID ก่อนบันทึก
+  let lastRow = sheet.getLastRow();
+  let newId = lastRow; // ID อัตโนมัติ
+
+  // บันทึกข้อมูล
+  sheet.appendRow([
+    newId,
+    params.get("name"),
+    params.get("position") || "นักเรียน",
+    params.get("score"),
+    new Date().toLocaleString("th-TH")
+  ]);
+
+  // สร้าง Slide เกียรติบัตร
+  const template = DriveApp.getFileById("${TEMPLATE_SLIDE_ID}");
+  const copy = template.makeCopy(params.get("name") + "_cert");
+  DriveApp.getFolderById("${FOLDER_ID}").addFile(copy);
+
+  // แปลงเป็น PDF
+  const pdfBlob = copy.getAs("application/pdf");
+  const pdfFile = DriveApp.getFolderById("${FOLDER_ID}")
+    .createFile(pdfBlob.setName(params.get("name") + "_cert.pdf"));
+
+  return ContentService.createTextOutput(
+    JSON.stringify({ success: true, url: pdfFile.getUrl() })
+  ).setMimeType(ContentService.MimeType.JSON);
+}`.trim();
+}
+
+// =================== SAVE TO SHEET ===================
+async function saveToSheet() {
+  try {
+    const data = new URLSearchParams({
+      name: userName,
+      position: "นักเรียน ม.2",
+      score: postScore,
+      preScore: preScore,
+      timestamp: new Date().toLocaleString('th-TH')
+    });
+    await fetch(APP_SCRIPT_URL, { method:'POST', body: data.toString(), headers:{'Content-Type':'application/x-www-form-urlencoded'} });
+  } catch(e) { /* silent */ }
+}
+
+// =================== INIT ===================
+document.getElementById('input-name').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
