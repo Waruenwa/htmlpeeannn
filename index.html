@@ -346,24 +346,55 @@
       <p>แสดงผลสำเร็จการเรียนรู้</p>
     </div>
 
-    <div id="cert-content"></div>
+    <!-- สถานะผ่าน/ไม่ผ่าน -->
+    <div id="cert-status"></div>
 
-    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+    <!-- ฟอร์มสร้างเกียรติบัตร (แสดงเมื่อผ่าน 80%) -->
+    <div id="cert-form" style="display:none;">
+      <div class="content-card">
+        <div class="form-group">
+          <label><i class="fa fa-user" style="color:var(--primary);margin-right:6px;"></i>ชื่อผู้รับเกียรติบัตร</label>
+          <input type="text" id="cert-name-input" placeholder="กรอกชื่อ-นามสกุล" />
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-id-badge" style="color:var(--primary);margin-right:6px;"></i>ตำแหน่ง</label>
+          <input type="text" id="cert-position-input" placeholder="เช่น นักเรียน ม.2/1" />
+        </div>
+        <button class="btn btn-success btn-full" onclick="createCert()" id="btn-create-cert">
+          <i class="fa fa-certificate"></i> สร้างเกียรติบัตร
+        </button>
+      </div>
+
+      <!-- ผลลัพธ์หลังสร้าง -->
+      <div id="cert-result" style="display:none;" class="content-card" style="text-align:center;">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:32px;margin-bottom:8px;">✅</div>
+          <div style="font-size:18px;font-weight:800;color:#15803d;margin-bottom:4px;">สร้างเกียรติบัตรสำเร็จ!</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">ID: <span id="cert-result-id">-</span></div>
+          <a id="cert-download-btn" href="#" target="_blank" class="btn btn-success btn-full">
+            <i class="fa fa-download"></i> ดาวน์โหลดเกียรติบัตร
+          </a>
+        </div>
+      </div>
+
+      <!-- ค้นหาเกียรติบัตร -->
+      <div class="content-card" style="margin-top:8px;">
+        <div style="font-size:15px;font-weight:700;color:var(--primary-dark);margin-bottom:12px;">
+          <i class="fa fa-search" style="margin-right:6px;"></i>ค้นหาเกียรติบัตร
+        </div>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="cert-search-input" placeholder="ค้นหาด้วยชื่อหรือ ID"
+            style="flex:1;padding:12px 16px;border:2px solid rgba(14,165,233,0.25);border-radius:12px;font-family:var(--font);font-size:15px;outline:none;" />
+          <button class="btn btn-primary" onclick="searchCert()" style="padding:12px 20px;">ค้นหา</button>
+        </div>
+        <div id="cert-search-result" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
       <button class="btn btn-outline" onclick="goPage('page-menu')">
         <i class="fa fa-arrow-left"></i> กลับเมนู
       </button>
-      <a id="cert-download-btn" href="#" target="_blank" style="display:none;" class="btn btn-success">
-        <i class="fa fa-download"></i> ดาวน์โหลดเกียรติบัตร
-      </a>
-    </div>
-
-    <!-- GAS Code -->
-    <div class="content-card" style="margin-top:32px;">
-      <h3 style="font-size:17px;margin-bottom:8px;">🔧 Google Apps Script Code</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">
-        วางใน script.google.com แล้ว Deploy เป็น Web App เพื่อบันทึกข้อมูลและสร้างเกียรติบัตรอัตโนมัติ
-      </p>
-      <div class="code-block" id="gas-code"></div>
     </div>
   </div>
 </div>
