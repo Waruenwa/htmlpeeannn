@@ -409,125 +409,69 @@ function renderScore() {
 
 // =================== CERT PAGE ===================
 function renderCert() {
-  const el  = document.getElementById("cert-content");
-  const btn = document.getElementById("cert-download-btn");
+  const statusEl = document.getElementById("cert-status");
+  const formEl   = document.getElementById("cert-form");
+  const resultEl = document.getElementById("cert-result");
+
+  // reset
+  resultEl.style.display = "none";
+  document.getElementById("cert-search-result").innerHTML = "";
 
   if (postScore < 0) {
-    el.innerHTML = '<div class="content-card"><p>กรุณาทำแบบทดสอบหลังเรียนก่อน</p></div>';
-    btn.style.display = "none";
+    statusEl.innerHTML = `<div class="content-card" style="text-align:center;padding:32px;">
+      <div style="font-size:48px;margin-bottom:12px;">📝</div>
+      <p style="color:var(--muted);">กรุณาทำแบบทดสอบหลังเรียนก่อน</p>
+    </div>`;
+    formEl.style.display = "none";
     return;
   }
 
-  const pct     = Math.round(postScore / 20 * 100);
+  const pct = Math.round(postScore / 20 * 100);
+
+  if (pct >= 80) {
+    statusEl.innerHTML = `<div style="margin-bottom:16px;">
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:2px solid #22c55e;border-radius:12px;padding:10px 20px;font-size:16px;font-weight:700;color:#15803d;">
+        ✅ ผ่านเกณฑ์! (${pct}%)
+      </span>
+    </div>`;
+    // ใส่ชื่อจาก login ไว้ให้เลย
+    document.getElementById("cert-name-input").value = userName;
+    document.getElementById("cert-position-input").value = "นักเรียน ม.2";
+    formEl.style.display = "block";
+  } else {
+    statusEl.innerHTML = `<div class="result-card">
+      <div style="font-size:64px;margin-bottom:16px;">😔</div>
+      <h3 style="font-size:22px;font-weight:800;color:var(--primary-dark);margin-bottom:8px;">คะแนนไม่ถึง 80%</h3>
+      <p style="color:var(--muted);">คุณได้ ${pct}% กรุณาทบทวนเนื้อหาและลองอีกครั้ง</p>
+    </div>`;
+    formEl.style.display = "none";
+  }
+}
+
+// =================== CREATE CERT ===================
+async function createCert() {
+  const nameVal = document.getElementById("cert-name-input").value.trim();
+  const posVal  = document.getElementById("cert-position-input").value.trim();
+
+  if (!nameVal) {
+    Swal.fire({ icon: "warning", title: "กรุณากรอกชื่อ", confirmButtonColor: "#0ea5e9" });
+    return;
+  }
+
+  const btn = document.getElementById("btn-create-cert");
+  btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> กำลังสร้าง...`;
+  btn.disabled = true;
+
   const now     = new Date();
   const dateStr = now.toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" });
   const timeStr = now.toLocaleTimeString("th-TH");
-
-  if (pct >= 80) {
-    certId = String(Math.floor(Math.random() * 900) + 100).padStart(3, "0");
-
-    // แสดง UI เกียรติบัตร
-    el.innerHTML = `
-      <div class="cert-wrap">
-        <div class="cert-title">เกียรติบัตรแสดงความสำเร็จ</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">ID เกียรติบัตร: ${certId}</div>
-        <div class="cert-name">${userName}</div>
-        <div class="cert-subject">
-          ผ่านบทเรียนออนไลน์ วิชานวัตกรรมสุขภาพ<br>
-          เรื่อง <strong>โรคเอดส์</strong> ระดับชั้น ม.2
-        </div>
-        <div class="cert-score">คะแนน ${postScore}/20 (${pct}%)</div>
-        <div class="cert-by">
-          ออกให้ ณ วันที่ ${dateStr}<br>
-          ตำแหน่ง: ครูผู้สอน &nbsp;|&nbsp; ประทับเวลา: ${timeStr}
-        </div>
-      </div>`;
-
-    // ซ่อนปุ่มก่อน แล้วส่งข้อมูลไป GAS เพื่อสร้าง PDF จริง
-    btn.style.display = "none";
-    requestCertFromGAS(certId, dateStr, timeStr, btn);
-
-  } else {
-    el.innerHTML = `
-      <div class="result-card">
-        <div style="font-size:64px;margin-bottom:16px;">😔</div>
-        <h3 style="font-size:22px;font-weight:800;color:var(--primary-dark);margin-bottom:8px;">คะแนนไม่ถึง 80%</h3>
-        <p style="color:var(--muted);">คุณได้ ${pct}% กรุณาทบทวนเนื้อหาและลองอีกครั้ง</p>
-      </div>`;
-    btn.style.display = "none";
-  }
-
-  // แสดง GAS Code
-  document.getElementById("gas-code").textContent =
-`// Google Apps Script — บันทึกข้อมูลและสร้างเกียรติบัตร
-// วางโค้ดนี้ที่ script.google.com แล้ว Deploy เป็น Web App
-
-const SHEET_ID          = "${SHEET_ID}";
-const TEMPLATE_SLIDE_ID = "${TEMPLATE_SLIDE_ID}";
-const FOLDER_ID         = "${FOLDER_ID}";
-
-function doPost(e) {
-  const params = new URLSearchParams(e.postData.contents);
-
-  const ss    = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getActiveSheet();
-
-  // สร้าง ID อัตโนมัติ เริ่มจาก 001
-  const lastRow = sheet.getLastRow();
-  const newId   = String(lastRow).padStart(3, "0");
-
-  // ตรวจสอบว่า ID ซ้ำหรือไม่
-  if (lastRow > 1) {
-    const existing = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
-    if (existing.includes(newId)) return;
-  }
-
-  // บันทึกข้อมูลลง Sheet
-  sheet.appendRow([
-    newId,
-    params.get("name"),
-    params.get("position") || "นักเรียน",
-    params.get("score"),
-    new Date().toLocaleString("th-TH")
-  ]);
-
-  // Clone Slide Template แล้วแทนค่า
-  const template = DriveApp.getFileById(TEMPLATE_SLIDE_ID);
-  const copy     = template.makeCopy(params.get("name") + "_cert");
-  DriveApp.getFolderById(FOLDER_ID).addFile(copy);
-
-  const pres   = SlidesApp.openById(copy.getId());
-  const slides = pres.getSlides();
-  slides[0].replaceAllText("{{ชื่อผู้รับ}}", params.get("name"));
-  slides[0].replaceAllText("{{ตำแหน่ง}}",   params.get("position") || "นักเรียน");
-  slides[0].replaceAllText("{{ประทับเวลา}}", new Date().toLocaleString("th-TH"));
-  pres.saveAndClose();
-
-  // แปลงเป็น PDF
-  const pdfBlob = DriveApp.getFileById(copy.getId()).getAs("application/pdf");
-  const pdfFile = DriveApp.getFolderById(FOLDER_ID)
-    .createFile(pdfBlob.setName(params.get("name") + "_cert.pdf"));
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ success: true, url: pdfFile.getUrl() }))
-    .setMimeType(ContentService.MimeType.JSON);
-}`;
-}
-
-// =================== REQUEST CERT FROM GAS ===================
-async function requestCertFromGAS(id, dateStr, timeStr, btn) {
-  // แสดง loading บนปุ่ม
-  btn.style.display = "";
-  btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> กำลังสร้างเกียรติบัตร...`;
-  btn.style.pointerEvents = "none";
-  btn.style.opacity = "0.7";
+  const pct     = Math.round(postScore / 20 * 100);
 
   try {
     const body = new URLSearchParams({
-      id:        id,
-      name:      userName,
-      position:  "นักเรียน ม.2",
-      score:     postScore + "/20 (" + Math.round(postScore / 20 * 100) + "%)",
+      name:      nameVal,
+      position:  posVal || "นักเรียน ม.2",
+      score:     postScore + "/20 (" + pct + "%)",
       date:      dateStr,
       timestamp: timeStr,
     });
@@ -539,24 +483,57 @@ async function requestCertFromGAS(id, dateStr, timeStr, btn) {
     });
     const data = await res.json();
 
-    if (data.success && data.url) {
-      // GAS คืน URL PDF มาให้ → ใส่ใน href ปุ่มดาวน์โหลด
-      btn.href = data.url;
-      btn.target = "_blank";
-      btn.innerHTML = `<i class="fa fa-download"></i> ดาวน์โหลดเกียรติบัตร`;
-      btn.style.pointerEvents = "";
-      btn.style.opacity = "";
+    // แสดง popup สำเร็จ
+    await Swal.fire({
+      icon: "success",
+      title: "สำเร็จ!",
+      text: "สร้างเกียรติบัตรเรียบร้อยแล้ว",
+      confirmButtonColor: "#5b5bd6",
+    });
+
+    // แสดงผลลัพธ์
+    const resultEl = document.getElementById("cert-result");
+    document.getElementById("cert-result-id").textContent = data.id || "-";
+    const dlBtn = document.getElementById("cert-download-btn");
+    dlBtn.href   = data.url || `https://drive.google.com/file/d/${TEMPLATE_SLIDE_ID}/view`;
+    dlBtn.target = "_blank";
+    resultEl.style.display = "block";
+
+  } catch (err) {
+    console.warn("createCert failed:", err);
+    Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถสร้างเกียรติบัตรได้ กรุณาลองใหม่", confirmButtonColor: "#0ea5e9" });
+  } finally {
+    btn.innerHTML = `<i class="fa fa-certificate"></i> สร้างเกียรติบัตร`;
+    btn.disabled  = false;
+  }
+}
+
+// =================== SEARCH CERT ===================
+async function searchCert() {
+  const q   = document.getElementById("cert-search-input").value.trim();
+  const el  = document.getElementById("cert-search-result");
+  if (!q) return;
+
+  el.innerHTML = `<p style="color:var(--muted);font-size:13px;"><i class="fa fa-spinner fa-spin"></i> กำลังค้นหา...</p>`;
+
+  try {
+    const res  = await fetch(APP_SCRIPT_URL + "?action=search&q=" + encodeURIComponent(q));
+    const data = await res.json();
+
+    if (data && data.length > 0) {
+      el.innerHTML = data.map(r => `
+        <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:12px;padding:14px 16px;margin-bottom:8px;">
+          <div style="font-weight:700;color:#15803d;">ID: ${r.id} — ${r.name}</div>
+          <div style="font-size:13px;color:var(--muted);">${r.position} | คะแนน ${r.score} | ${r.timestamp}</div>
+          ${r.url ? `<a href="${r.url}" target="_blank" class="btn btn-success" style="margin-top:8px;padding:6px 16px;font-size:13px;">
+            <i class="fa fa-download"></i> ดาวน์โหลด
+          </a>` : ""}
+        </div>`).join("");
     } else {
-      throw new Error("no url");
+      el.innerHTML = `<p style="color:var(--muted);font-size:13px;">ไม่พบข้อมูล</p>`;
     }
   } catch (err) {
-    // fallback → เปิด template ใน Drive แทน
-    console.warn("GAS cert failed:", err);
-    btn.href = `https://drive.google.com/file/d/${TEMPLATE_SLIDE_ID}/view`;
-    btn.target = "_blank";
-    btn.innerHTML = `<i class="fa fa-external-link-alt"></i> เปิดเกียรติบัตร (Drive)`;
-    btn.style.pointerEvents = "";
-    btn.style.opacity = "";
+    el.innerHTML = `<p style="color:#ef4444;font-size:13px;">ไม่สามารถค้นหาได้</p>`;
   }
 }
 
