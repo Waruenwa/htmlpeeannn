@@ -3,9 +3,9 @@
    =================================================== */
 
 // =================== CONFIG ===================
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBhsFR1vIclJiFo6W1PhOS5vMOrbFgvn0mbpe4ncDMkgtVvB8XZSheI6oHTcjLWqTQ/exec";
+const APP_SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbyHPgSktqg1Dat3B2mP96Oe8Xx3XBzczFPZ7y38sOfmnGFSf1_a_cxwXBM3IzAJ7t1g/exec";
 const SHEET_ID         = "1EYDC6zkR3xW1gRksFKpf628qTbhgEeIYNrqNXD5d3Xk";
-const TEMPLATE_SLIDE_ID = "12X6GKM79_Kj23Oe9KUvHworQF3kdjOSEFPqlbOORQnc";
+const TEMPLATE_SLIDE_ID = "12X6GKM79_Kj23Oe9KUvHworQF3kdjOSEFPqIbOORQnc";
 const FOLDER_ID        = "1DzUhhAK9dfWg7_DdoGOyStZdr8xHRXQc";
 
 // =================== QUESTION BANK (20 ข้อ) ===================
@@ -93,6 +93,50 @@ function shuffle(arr) {
 
 function showLoading(visible) {
   document.getElementById("loading-overlay").style.display = visible ? "flex" : "none";
+}
+
+function getDriveViewUrl(fileId) {
+  return `https://drive.google.com/file/d/${fileId}/view`;
+}
+
+async function readAppScriptJson(res, actionName) {
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`${actionName} failed: HTTP ${res.status}`);
+  }
+
+  try {
+    const data = JSON.parse(text);
+    if (data && (data.error || data.status === "error")) {
+      throw new Error(data.error || data.message || `${actionName} failed`);
+    }
+    return data;
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(`${actionName} failed: Apps Script did not return JSON`);
+    }
+    throw err;
+  }
+}
+
+function normalizeCertResults(data) {
+  let records = [];
+  if (Array.isArray(data)) records = data;
+  else if (!data || data.found === false) records = [];
+  else if (Array.isArray(data.results)) records = data.results;
+  else if (Array.isArray(data.data)) records = data.data;
+  else if (Array.isArray(data.items)) records = data.items;
+  else if (data.record) records = [data.record];
+  else if (data.data && typeof data.data === "object") records = [data.data];
+  else if (data.id || data.url || data.fileId || data.pdfId) records = [data];
+
+  return records.map(r => {
+    const fileId = r.fileId || r.pdfId || r.driveFileId;
+    return {
+      ...r,
+      url: r.url || (fileId ? getDriveViewUrl(fileId) : "")
+    };
+  });
 }
 
 function goPage(id) {
@@ -469,6 +513,7 @@ async function createCert() {
 
   try {
     const body = new URLSearchParams({
+      action:    "createCert",
       name:      nameVal,
       position:  posVal || "นักเรียน ม.2",
       score:     postScore + "/20 (" + pct + "%)",
@@ -481,7 +526,17 @@ async function createCert() {
       body:    body.toString(),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
-    const data = await res.json();
+    const data = await readAppScriptJson(res, "create certificate");
+    if (!data) {
+      throw new Error("create certificate failed: empty response");
+    }
+    const fileId = data.fileId || data.pdfId || data.driveFileId;
+    if (!data.url && fileId) {
+      data.url = getDriveViewUrl(fileId);
+    }
+    if (!data || !data.url) {
+      throw new Error("create certificate failed: missing download URL");
+    }
 
     // แสดง popup สำเร็จ
     await Swal.fire({
@@ -495,12 +550,19 @@ async function createCert() {
     const resultEl = document.getElementById("cert-result");
     document.getElementById("cert-result-id").textContent = data.id || "-";
     const dlBtn = document.getElementById("cert-download-btn");
-    dlBtn.href   = data.url || `https://drive.google.com/file/d/${TEMPLATE_SLIDE_ID}/view`;
+    dlBtn.href   = data.url;
     dlBtn.target = "_blank";
     resultEl.style.display = "block";
 
   } catch (err) {
     console.warn("createCert failed:", err);
+    Swal.fire({
+      icon: "error",
+      title: "ไม่สามารถสร้างเกียรติบัตรได้",
+      text: err.message || "กรุณาตรวจสอบ Apps Script URL และสิทธิ์การเข้าถึง",
+      confirmButtonColor: "#0ea5e9"
+    });
+    return;
     Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถสร้างเกียรติบัตรได้ กรุณาลองใหม่", confirmButtonColor: "#0ea5e9" });
   } finally {
     btn.innerHTML = `<i class="fa fa-certificate"></i> สร้างเกียรติบัตร`;
@@ -518,10 +580,11 @@ async function searchCert() {
 
   try {
     const res  = await fetch(APP_SCRIPT_URL + "?action=search&q=" + encodeURIComponent(q));
-    const data = await res.json();
+    const data = await readAppScriptJson(res, "search certificate");
+    const results = normalizeCertResults(data);
 
-    if (data && data.length > 0) {
-      el.innerHTML = data.map(r => `
+    if (results.length > 0) {
+      el.innerHTML = results.map(r => `
         <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:12px;padding:14px 16px;margin-bottom:8px;">
           <div style="font-weight:700;color:#15803d;">ID: ${r.id} — ${r.name}</div>
           <div style="font-size:13px;color:var(--muted);">${r.position} | คะแนน ${r.score} | ${r.timestamp}</div>
@@ -541,6 +604,7 @@ async function searchCert() {
 async function saveToSheet() {
   try {
     const body = new URLSearchParams({
+      action:    "saveScore",
       name:      userName,
       position:  "นักเรียน ม.2",
       score:     postScore,
