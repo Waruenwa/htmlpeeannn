@@ -3,7 +3,7 @@
    =================================================== */
 
 // =================== CONFIG ===================
-const APP_SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbyHPgSktqg1Dat3B2mP96Oe8Xx3XBzczFPZ7y38sOfmnGFSf1_a_cxwXBM3lzAJ7t1g/exec";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUYmE6qyhbullJDTTdGUtcktmjuObGE1Y_Fr-8-yXoLG026BuQxXltJ5lbjHqI3IZo/exec";
 const SHEET_ID         = "1EYDC6zkR3xW1gRksFKpf628qTbhgEeIYNrqNXD5d3Xk";
 const TEMPLATE_SLIDE_ID = "12X6GKM79_Kj23Oe9KUvHworQF3kdjOSEFPqlbOORQnc";
 const FOLDER_ID        = "1DzUhhAK9dfWg7_DdoGOyStZdr8xHRXQc";
