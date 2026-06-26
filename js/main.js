@@ -99,6 +99,43 @@ function getDriveViewUrl(fileId) {
   return `https://drive.google.com/file/d/${fileId}/view`;
 }
 
+function getCertUrl(data) {
+  if (!data || typeof data !== "object") return "";
+
+  const urlKeys = [
+    "url", "pdfUrl", "fileUrl", "downloadUrl", "viewUrl",
+    "webViewLink", "certificateUrl", "certUrl"
+  ];
+  for (const key of urlKeys) {
+    if (typeof data[key] === "string" && data[key]) return data[key];
+  }
+
+  const nestedObjects = [data.data, data.result, data.record, data.file, data.pdf];
+  for (const item of nestedObjects) {
+    const nestedUrl = getCertUrl(item);
+    if (nestedUrl) return nestedUrl;
+  }
+
+  const fileId =
+    data.fileId || data.pdfId || data.driveFileId || data.pdfFileId ||
+    (data.file && data.file.id) || (data.pdf && data.pdf.id);
+  return fileId ? getDriveViewUrl(fileId) : "";
+}
+
+function getCertId(data) {
+  return data.certId || data.certificateId || data.id ||
+    (data.data && (data.data.certId || data.data.certificateId || data.data.id)) ||
+    "-";
+}
+
+function summarizeAppScriptResponse(data) {
+  try {
+    return JSON.stringify(data).slice(0, 220);
+  } catch (err) {
+    return String(data).slice(0, 220);
+  }
+}
+
 async function readAppScriptJson(res, actionName) {
   const text = await res.text();
   if (!res.ok) {
@@ -131,12 +168,35 @@ function normalizeCertResults(data) {
   else if (data.id || data.url || data.fileId || data.pdfId) records = [data];
 
   return records.map(r => {
-    const fileId = r.fileId || r.pdfId || r.driveFileId;
     return {
       ...r,
-      url: r.url || (fileId ? getDriveViewUrl(fileId) : "")
+      url: getCertUrl(r)
     };
   });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function findCertAfterCreate(data, nameVal) {
+  const queries = [
+    getCertId(data),
+    data && data.id,
+    data && data.certId,
+    data && data.certificateId,
+    nameVal
+  ].filter(q => q && q !== "-");
+
+  for (const q of [...new Set(queries)]) {
+    const res = await fetch(APP_SCRIPT_URL + "?action=search&q=" + encodeURIComponent(q));
+    const searchData = await readAppScriptJson(res, "search certificate");
+    const results = normalizeCertResults(searchData);
+    const hit = results.find(r => r.url) || results[0];
+    if (hit && hit.url) return hit;
+  }
+
+  return null;
 }
 
 function goPage(id) {
@@ -530,12 +590,19 @@ async function createCert() {
     if (!data) {
       throw new Error("create certificate failed: empty response");
     }
-    const fileId = data.fileId || data.pdfId || data.driveFileId;
-    if (!data.url && fileId) {
-      data.url = getDriveViewUrl(fileId);
+    let certUrl = getCertUrl(data);
+    let certData = data;
+    if (!certUrl) {
+      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> กำลังค้นหาลิงก์...`;
+      await sleep(1200);
+      const foundCert = await findCertAfterCreate(data, nameVal);
+      if (foundCert && foundCert.url) {
+        certUrl = foundCert.url;
+        certData = foundCert;
+      }
     }
-    if (!data || !data.url) {
-      throw new Error("create certificate failed: missing download URL");
+    if (!certUrl) {
+      throw new Error("Apps Script ไม่ได้ส่ง URL ของ PDF กลับมา: " + summarizeAppScriptResponse(data));
     }
 
     // แสดง popup สำเร็จ
@@ -548,9 +615,9 @@ async function createCert() {
 
     // แสดงผลลัพธ์
     const resultEl = document.getElementById("cert-result");
-    document.getElementById("cert-result-id").textContent = data.id || "-";
+    document.getElementById("cert-result-id").textContent = getCertId(certData);
     const dlBtn = document.getElementById("cert-download-btn");
-    dlBtn.href   = data.url;
+    dlBtn.href   = certUrl;
     dlBtn.target = "_blank";
     resultEl.style.display = "block";
 
